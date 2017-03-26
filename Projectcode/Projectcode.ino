@@ -1,10 +1,3 @@
-#define LM1 2
-#define LM2 3
-#define RM1 4
-#define RM2 5
-#define EN1 6
-#define EN2 7
-
 #include <FuzzyRule.h>
 #include <FuzzyComposition.h>
 #include <Fuzzy.h>
@@ -14,16 +7,41 @@
 #include <FuzzyIO.h>
 #include <FuzzySet.h>
 #include <FuzzyRuleAntecedent.h>
+#include <Encoder.h>
+
+#define LM1 2
+#define LM2 3
+#define RM1 4
+#define RM2 5
+#define EN1 6
+#define EN2 7
+#define ENCODERFACTOR 0.1
+#define AXLE_LENGTH 10
+
+Encoder leftEnc(2, 3);
+Encoder rightEnc (18, 19);
+
+long long prev_position_l = 0, curr_position_l = 0;
+long long prev_position_r = 0, curr_position_r = 0;
+
+float target_x, target_y;
+float curr_x = 0 , curr_y = 0;
+float curr_theta = 0, prev_theta = 0;
+
+float diff_angle = 100;
+float dist_from_target = 200;
+
 
 int dist1, dist2, dist3, dist4; // distances of all 4 ultrasonic sensors
 int robotAngle = 0; // current Angle of the robot
 
-int getRobotAngle()
+void moveRobot(int targetVL, int targetVR)
 {
-  //ADD ANGLE DIFFERENCE CALCULATION CODE HERE
-  return robotAngle;
+  analogWrite(LM1, targetVL);
+  digitalWrite(LM2, LOW);
+  analogWrite(RM1, targetVR);
+  digitalWrite(RM2, LOW);
 }
-
 
 void getAllDistances()
 {
@@ -37,16 +55,54 @@ void getAllDistances()
 
 void updateOdometry()
 {
-  //ADD ODOMETRY CODE HERE
+  curr_position_l = leftEnc.read();
+  curr_position_r = rightEnc.read();
+
+  float diff_l = curr_position_l - prev_position_l;
+  float diff_r = curr_position_r - prev_position_r;
+  
+  float cos_current = cos(curr_theta);
+  float sin_current = sin(curr_theta);
+  
+  if (diff_l == diff_r)
+  {
+    /* Moving in a straight line */
+    curr_x += diff_l * cos_current;
+    curr_y += diff_l * sin_current;
+  }
+  else
+  {
+    /* Moving in an arc */
+    float expr1 = AXLE_LENGTH * (diff_r + diff_l)/ (2.0 * (diff_r - diff_l));
+
+    float right_minus_left = diff_r - diff_l;
+
+    curr_x += expr1 * (sin(right_minus_left / AXLE_LENGTH + curr_theta) - sin_current);
+
+    curr_y -= expr1 * (cos(right_minus_left / AXLE_LENGTH + curr_theta) - cos_current);
+
+    /* Calculate new orientation */
+    curr_theta += right_minus_left / AXLE_LENGTH;
+
+    /* Keep in the range -PI to +PI */
+    while (curr_theta > PI)
+      curr_theta -= (2.0 * PI);
+    while (curr_theta < -PI)
+      curr_theta += (2.0 * PI);
+      
+    prev_position_l = curr_position_l;
+    prev_position_r = curr_position_r;
+    
+  }
 }
 
 
 // Step 1 -  Instantiating an object library
 Fuzzy* fuzzy = new Fuzzy();
 
-void setup() 
+void setup()
 {
-  
+
   Serial.begin(9600);
 
   pinMode(LM1, OUTPUT); // left motor input1
@@ -56,8 +112,8 @@ void setup()
   pinMode(EN1, OUTPUT); // enable 1
   pinMode(EN2, OUTPUT); // enable 2
 
-  // Step 2 - Creating a FuzzyInput distance
-  FuzzyInput* distance = new FuzzyInput(1);// With its ID in param
+  //Creating a FuzzyInput distance
+  FuzzyInput* distance = new FuzzyInput(1);
 
   // Creating the FuzzySet to compond FuzzyInput distance
   FuzzySet* verysmall = new FuzzySet(0, 0, 0, 125);
@@ -119,8 +175,8 @@ void setup()
   vr->addFuzzySet(veryfast);
 
 
-  fuzzy->addFuzzyOutput(vl); 
-  fuzzy->addFuzzyOutput(vr); 
+  fuzzy->addFuzzyOutput(vl);
+  fuzzy->addFuzzyOutput(vr);
 
 
   FuzzyRuleAntecedent*  VSNB = new FuzzyRuleAntecedent();
@@ -314,21 +370,16 @@ void setup()
   fuzzy->addFuzzyRule(fuzzyRule35);
 
 
-
-
 }
 
-void loop() 
+void loop()
 {
-  getAllDistances();
-  getRobotAngle();
+  //getAllDistances();  //to be used in pt 2 of code
   updateOdometry();
-  
-  
-  
-  fuzzy->setInput(1, 10); //todo: ADD DISTANCE FROM TARGET
-  fuzzy->setInput(2, 20); //todo: ADD ANGLE DIFFERENCE
-  
+
+  fuzzy->setInput(1, dist_from_target); //todo: ADD DISTANCE FROM TARGET
+  fuzzy->setInput(2, diff_angle); //todo: ADD ANGLE DIFFERENCE
+
   fuzzy->fuzzify();
 
   float targetvl = fuzzy->defuzzify(1);
@@ -338,6 +389,8 @@ void loop()
   Serial.print(targetvl);
   Serial.print("\t Vr: \t");
   Serial.println(targetvr);
+
+  moveRobot(targetvl, targetvr);
 
   delay(100);
 }
