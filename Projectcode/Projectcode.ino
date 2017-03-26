@@ -118,38 +118,121 @@ void setup() {
 
   fuzzy->addFuzzyOutput(vl); // Add FuzzyOutput to Fuzzy object
   fuzzy->addFuzzyOutput(vr); // Add FuzzyOutput to Fuzzy object
-/*
-  //Passo 4 - Assembly the Fuzzy rules
-  // FuzzyRule "IF distance = samll THEN velocity = slow"
-  FuzzyRuleAntecedent* ifDistanceSmall = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
-  ifDistanceSmall->joinSingle(small); // Adding corresponding FuzzySet to Antecedent object
-  FuzzyRuleConsequent* thenVelocitySlow = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
-  thenVelocitySlow->addOutput(slow);// Adding corresponding FuzzySet to Consequent object
-  // Instantiating a FuzzyRule object
-  FuzzyRule* fuzzyRule01 = new FuzzyRule(1, ifDistanceSmall, thenVelocitySlow); // Passing the Antecedent and the Consequent of expression
 
-  fuzzy->addFuzzyRule(fuzzyRule01); // Adding FuzzyRule to Fuzzy object
 
-  // FuzzyRule "IF distance = safe THEN velocity = normal"
-  FuzzyRuleAntecedent* ifDistanceSafe = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
-  ifDistanceSafe->joinSingle(safe); // Adding corresponding FuzzySet to Antecedent object
-  FuzzyRuleConsequent* thenVelocityAverage = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
-  thenVelocityAverage->addOutput(average); // Adding corresponding FuzzySet to Consequent object
-  // Instantiating a FuzzyRule object
-  FuzzyRule* fuzzyRule02 = new FuzzyRule(2, ifDistanceSafe, thenVelocityAverage); // Passing the Antecedent and the Consequent of expression
+  FuzzyRuleAntecedent*  VSNB = new FuzzyRuleAntecedent();
+  VSNB->joinWithAND(verysmall, negbig);
+  FuzzyRuleAntecedent*  SNB = new FuzzyRuleAntecedent();
+  SNB->joinWithAND(small, negbig);
+  FuzzyRuleAntecedent*  MNB = new FuzzyRuleAntecedent();
+  MNB->joinWithAND(medium, negbig);
+  FuzzyRuleAntecedent*  BNB = new FuzzyRuleAntecedent();
+  BNB->joinWithAND(big, negbig);
+  FuzzyRuleAntecedent*  VBNB = new FuzzyRuleAntecedent();
+  VBNB->joinWithAND(verybig, negbig);
 
-  fuzzy->addFuzzyRule(fuzzyRule02); // Adding FuzzyRule to Fuzzy object
+  FuzzyRuleAntecedent*  VSNM = new FuzzyRuleAntecedent();
+  VSNM->joinWithAND(verysmall, negmed);
+  FuzzyRuleAntecedent*  SNM = new FuzzyRuleAntecedent();
+  SNM->joinWithAND(small, negmed);
+  FuzzyRuleAntecedent*  MNM = new FuzzyRuleAntecedent();
+  MNM->joinWithAND(medium, negmed);
+  FuzzyRuleAntecedent*  BNM = new FuzzyRuleAntecedent();
+  BNM->joinWithAND(big, negmed);
+  FuzzyRuleAntecedent*  VBNM = new FuzzyRuleAntecedent();
+  VBNM->joinWithAND(verybig, negmed);
 
-  // FuzzyRule "IF distance = big THEN velocity = fast"
-  FuzzyRuleAntecedent* ifDistanceBig = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
-  ifDistanceBig->joinSingle(big); // Adding corresponding FuzzySet to Antecedent object
-  FuzzyRuleConsequent* thenVelocityFast = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
-  thenVelocityFast->addOutput(fast);// Adding corresponding FuzzySet to Consequent object
-  // Instantiating a FuzzyRule object
-  FuzzyRule* fuzzyRule03 = new FuzzyRule(3, ifDistanceBig, thenVelocityFast); // Passing the Antecedent and the Consequent of expression
+  FuzzyRuleAntecedent*  VSNS = new FuzzyRuleAntecedent();
+  VSNS->joinWithAND(verysmall, negsmall);
+  FuzzyRuleAntecedent*  SNS = new FuzzyRuleAntecedent();
+  SNS->joinWithAND(small, negsmall);
+  FuzzyRuleAntecedent*  MNS = new FuzzyRuleAntecedent();
+  MNS->joinWithAND(medium, negsmall);
+  FuzzyRuleAntecedent*  BNS = new FuzzyRuleAntecedent();
+  BNS->joinWithAND(big, negsmall);
+  FuzzyRuleAntecedent*  VBNS = new FuzzyRuleAntecedent();
+  VBNS->joinWithAND(verybig, negsmall);
 
-  fuzzy->addFuzzyRule(fuzzyRule03); // Adding FuzzyRule to Fuzzy object
-*/
+  FuzzyRuleAntecedent*  VSZ = new FuzzyRuleAntecedent();
+  VSZ->joinWithAND(verysmall, zero);
+  FuzzyRuleAntecedent*  SZ = new FuzzyRuleAntecedent();
+  SZ->joinWithAND(small, zero);
+  FuzzyRuleAntecedent*  MZ = new FuzzyRuleAntecedent();
+  MZ->joinWithAND(medium, zero);
+  FuzzyRuleAntecedent*  BZ = new FuzzyRuleAntecedent();
+  BZ->joinWithAND(big, zero);
+  FuzzyRuleAntecedent*  VBZ = new FuzzyRuleAntecedent();
+  VBZ->joinWithAND(verybig, zero);
+
+  FuzzyRuleAntecedent*  VSPS = new FuzzyRuleAntecedent();
+  VSPS->joinWithAND(verysmall, possmall);
+  FuzzyRuleAntecedent*  SPS = new FuzzyRuleAntecedent();
+  SPS->joinWithAND(small, possmall);
+  FuzzyRuleAntecedent*  MPS = new FuzzyRuleAntecedent();
+  MPS->joinWithAND(medium, possmall);
+  FuzzyRuleAntecedent*  BPS = new FuzzyRuleAntecedent();
+  BPS->joinWithAND(big, possmall);
+  FuzzyRuleAntecedent*  VBPS = new FuzzyRuleAntecedent();
+  VBPS->joinWithAND(verybig, possmall);
+
+  FuzzyRuleAntecedent*  VSPM = new FuzzyRuleAntecedent();
+  VSPM->joinWithAND(verysmall, posmed);
+  FuzzyRuleAntecedent*  SPM = new FuzzyRuleAntecedent();
+  SPM->joinWithAND(small, posmed);
+  FuzzyRuleAntecedent*  MPM = new FuzzyRuleAntecedent();
+  MPM->joinWithAND(medium, posmed);
+  FuzzyRuleAntecedent*  BPM = new FuzzyRuleAntecedent();
+  BPM->joinWithAND(big, posmed);
+  FuzzyRuleAntecedent*  VBPM = new FuzzyRuleAntecedent();
+  VBPM->joinWithAND(verybig, posmed);
+
+  FuzzyRuleAntecedent*  VSPB = new FuzzyRuleAntecedent();
+  VSPB->joinWithAND(verysmall, posbig);
+  FuzzyRuleAntecedent*  SPB = new FuzzyRuleAntecedent();
+  SPB->joinWithAND(small, posbig);
+  FuzzyRuleAntecedent*  MPB = new FuzzyRuleAntecedent();
+  MPB->joinWithAND(medium, posbig);
+  FuzzyRuleAntecedent*  BPB = new FuzzyRuleAntecedent();
+  BPB->joinWithAND(big, posbig);
+  FuzzyRuleAntecedent*  VBPB = new FuzzyRuleAntecedent();
+  VBPB->joinWithAND(verybig, posbig);
+
+
+
+
+
+  /*
+    //Passo 4 - Assembly the Fuzzy rules
+    // FuzzyRule "IF distance = samll THEN velocity = slow"
+    FuzzyRuleAntecedent* ifDistanceSmall = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
+    ifDistanceSmall->joinSingle(small); // Adding corresponding FuzzySet to Antecedent object
+    FuzzyRuleConsequent* thenVelocitySlow = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
+    thenVelocitySlow->addOutput(slow);// Adding corresponding FuzzySet to Consequent object
+    // Instantiating a FuzzyRule object
+    FuzzyRule* fuzzyRule01 = new FuzzyRule(1, ifDistanceSmall, thenVelocitySlow); // Passing the Antecedent and the Consequent of expression
+
+    fuzzy->addFuzzyRule(fuzzyRule01); // Adding FuzzyRule to Fuzzy object
+
+    // FuzzyRule "IF distance = safe THEN velocity = normal"
+    FuzzyRuleAntecedent* ifDistanceSafe = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
+    ifDistanceSafe->joinSingle(safe); // Adding corresponding FuzzySet to Antecedent object
+    FuzzyRuleConsequent* thenVelocityAverage = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
+    thenVelocityAverage->addOutput(average); // Adding corresponding FuzzySet to Consequent object
+    // Instantiating a FuzzyRule object
+    FuzzyRule* fuzzyRule02 = new FuzzyRule(2, ifDistanceSafe, thenVelocityAverage); // Passing the Antecedent and the Consequent of expression
+
+    fuzzy->addFuzzyRule(fuzzyRule02); // Adding FuzzyRule to Fuzzy object
+
+    // FuzzyRule "IF distance = big THEN velocity = fast"
+    FuzzyRuleAntecedent* ifDistanceBig = new FuzzyRuleAntecedent(); // Instantiating an Antecedent to expression
+    ifDistanceBig->joinSingle(big); // Adding corresponding FuzzySet to Antecedent object
+    FuzzyRuleConsequent* thenVelocityFast = new FuzzyRuleConsequent(); // Instantiating a Consequent to expression
+    thenVelocityFast->addOutput(fast);// Adding corresponding FuzzySet to Consequent object
+    // Instantiating a FuzzyRule object
+    FuzzyRule* fuzzyRule03 = new FuzzyRule(3, ifDistanceBig, thenVelocityFast); // Passing the Antecedent and the Consequent of expression
+
+    fuzzy->addFuzzyRule(fuzzyRule03); // Adding FuzzyRule to Fuzzy object
+  */
 }
 
 void loop() {
