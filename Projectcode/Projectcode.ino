@@ -9,8 +9,8 @@
 #include <FuzzyRuleAntecedent.h>
 #include <Encoder.h>
 
-#define LM1 2
-#define LM2 3
+#define LM1 8
+#define LM2 9
 #define RM1 4
 #define RM2 5
 #define EN1 6
@@ -24,7 +24,7 @@ Encoder rightEnc (18, 19);
 long long prev_position_l = 0, curr_position_l = 0;
 long long prev_position_r = 0, curr_position_r = 0;
 
-float target_x, target_y;
+float target_x = 400 , target_y = 400;
 float curr_x = 0 , curr_y = 0;
 float curr_theta = 0, prev_theta = 0;
 
@@ -37,9 +37,12 @@ int robotAngle = 0; // current Angle of the robot
 
 void moveRobot(int targetVL, int targetVR)
 {
-  analogWrite(LM1, targetVL);
+  
+  analogWrite(EN1, targetVL);
+  analogWrite(EN2, targetVR);
+  digitalWrite(LM1, HIGH);
   digitalWrite(LM2, LOW);
-  analogWrite(RM1, targetVR);
+  digitalWrite(RM1, HIGH);
   digitalWrite(RM2, LOW);
 }
 
