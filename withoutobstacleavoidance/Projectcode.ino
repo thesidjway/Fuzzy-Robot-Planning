@@ -9,14 +9,14 @@
 #include <FuzzyRuleAntecedent.h>
 #include <Encoder.h>
 
-#define LM1 8
-#define LM2 9
-#define RM1 4
+#define LM1 6
+#define LM2 13
+#define RM1 11
 #define RM2 5
-#define EN1 6
-#define EN2 7
-#define ENCODERFACTOR 0.1
-#define AXLE_LENGTH 10
+#define EN1 8
+#define EN2 12
+#define ENCODERFACTOR 0.0156
+#define AXLE_LENGTH 7.0
 
 Encoder leftEnc(2, 3);
 Encoder rightEnc (18, 19);
@@ -24,7 +24,7 @@ Encoder rightEnc (18, 19);
 long long prev_position_l = 0, curr_position_l = 0;
 long long prev_position_r = 0, curr_position_r = 0;
 
-float target_x = 400 , target_y = 400;
+float target_x = -400, target_y = 1;
 float curr_x = 0 , curr_y = 0;
 float curr_theta = 0, prev_theta = 0;
 
@@ -32,12 +32,11 @@ float diff_angle = 100;
 float dist_from_target = 200;
 
 
-int dist1, dist2, dist3, dist4; // distances of all 4 ultrasonic sensors
+int dist1, dist2, dist3; // distances of all 3 ultrasonic sensors
 int robotAngle = 0; // current Angle of the robot
 
 void moveRobot(int targetVL, int targetVR)
 {
-  
   analogWrite(EN1, targetVL);
   analogWrite(EN2, targetVR);
   digitalWrite(LM1, HIGH);
@@ -53,7 +52,6 @@ void getAllDistances()
   dist1 = temp_dist1;
   dist2 = temp_dist2;
   dist3 = temp_dist3;
-  dist4 = temp_dist4;
 }
 
 void updateOdometry()
@@ -63,10 +61,10 @@ void updateOdometry()
 
   float diff_l = curr_position_l - prev_position_l;
   float diff_r = curr_position_r - prev_position_r;
-  
+
   float cos_current = cos(curr_theta);
   float sin_current = sin(curr_theta);
-  
+
   if (diff_l == diff_r)
   {
     /* Moving in a straight line */
@@ -76,7 +74,7 @@ void updateOdometry()
   else
   {
     /* Moving in an arc */
-    float expr1 = AXLE_LENGTH * (diff_r + diff_l)/ (2.0 * (diff_r - diff_l));
+    float expr1 = AXLE_LENGTH * (diff_r + diff_l) / (2.0 * (diff_r - diff_l));
 
     float right_minus_left = diff_r - diff_l;
 
@@ -92,16 +90,42 @@ void updateOdometry()
       curr_theta -= (2.0 * PI);
     while (curr_theta < -PI)
       curr_theta += (2.0 * PI);
-      
+
     prev_position_l = curr_position_l;
     prev_position_r = curr_position_r;
-    
+
   }
+  Serial.print ("curr_x");
+  Serial.print (curr_x);
+  Serial.print ("curr_y");
+  Serial.print (curr_y);
+  float target_theta = atan2 (( target_y - curr_y), (target_x - curr_x));
+  dist_from_target = sqrt (pow( target_y - curr_y, 2) + pow(target_x - curr_x, 2));
+  diff_angle = target_theta - curr_theta;
+  while (diff_angle > PI)
+    diff_angle -= (2.0 * PI);
+  while (diff_angle < -PI)
+    diff_angle += (2.0 * PI);
 }
 
 
 // Step 1 -  Instantiating an object library
 Fuzzy* fuzzy = new Fuzzy();
+
+FuzzySet* verysmall = new FuzzySet(0, 0, 0, 125);
+FuzzySet* small = new FuzzySet(0, 125, 125, 250);
+FuzzySet* medium = new FuzzySet(125, 250, 250, 375);
+FuzzySet* big = new FuzzySet(250, 375, 375, 500);
+FuzzySet* verybig = new FuzzySet(375, 500, 500, 500);
+
+
+FuzzySet* negbig = new FuzzySet(-180, -180, -180, -120);
+FuzzySet* negmed = new FuzzySet(-180, -120, -120, -60);
+FuzzySet* negsmall = new FuzzySet(-120, -60, -60, 0);
+FuzzySet* zero = new FuzzySet(-60, 0, 0, 60);
+FuzzySet* possmall = new FuzzySet(0, 60, 60, 120);
+FuzzySet* posmed = new FuzzySet(60, 120, 120, 180);
+FuzzySet* posbig = new FuzzySet(120, 180, 180, 180);
 
 void setup()
 {
@@ -117,65 +141,62 @@ void setup()
 
   //Creating a FuzzyInput distance
   FuzzyInput* distance = new FuzzyInput(1);
-
-  // Creating the FuzzySet to compond FuzzyInput distance
-  FuzzySet* verysmall = new FuzzySet(0, 0, 0, 125);
   distance->addFuzzySet(verysmall);
-  FuzzySet* small = new FuzzySet(0, 125, 125, 250);
   distance->addFuzzySet(small);
-  FuzzySet* medium = new FuzzySet(125, 250, 250, 375);
   distance->addFuzzySet(medium);
-  FuzzySet* big = new FuzzySet(250, 375, 375, 500);
   distance->addFuzzySet(big);
-  FuzzySet* verybig = new FuzzySet(375, 500, 500, 500);
   distance->addFuzzySet(verybig);
 
-  // Creating the FuzzySet to compond FuzzyInput angle
-  FuzzyInput* angle = new FuzzyInput(2);
 
-  FuzzySet* negbig = new FuzzySet(-180, -180, -180, -120);
+  FuzzyInput* angle = new FuzzyInput(2);
   angle->addFuzzySet(negbig);
-  FuzzySet* negmed = new FuzzySet(-180, -120, -120, -60);
   angle->addFuzzySet(negmed);
-  FuzzySet* negsmall = new FuzzySet(-120, -60, -60, 0);
   angle->addFuzzySet(negsmall);
-  FuzzySet* zero = new FuzzySet(-60, 0, 0, 60);
   angle->addFuzzySet(zero);
-  FuzzySet* possmall = new FuzzySet(0, 60, 60, 120);
   angle->addFuzzySet(possmall);
-  FuzzySet* posmed = new FuzzySet(60, 120, 120, 180);
   angle->addFuzzySet(posmed);
-  FuzzySet* posbig = new FuzzySet(120, 180, 180, 180);
   angle->addFuzzySet(posbig);
 
 
+
+
+
+
+
   fuzzy->addFuzzyInput(distance); // Add FuzzyInput to Fuzzy object
+  fuzzy->addFuzzyInput(angle);
 
   // Passo 3 - Creating FuzzyOutput velocity
   FuzzyOutput* vl = new FuzzyOutput(1);
   FuzzyOutput* vr = new FuzzyOutput(2);
 
   // Creating FuzzySet to compond FuzzyOutput vl (Left Wheel Velocity)
-  FuzzySet* veryslow = new FuzzySet(0, 0, 0, 0);
-  FuzzySet* slow = new FuzzySet(100, 130, 130, 160);
-  FuzzySet* mid = new FuzzySet(130, 160, 160, 190);
-  FuzzySet* fast = new FuzzySet(160, 190, 190, 220);
-  FuzzySet* veryfast = new FuzzySet(190, 220, 220, 250);
+  FuzzySet* Lveryslow = new FuzzySet(0, 0, 0, 60);
+  FuzzySet* Lslow = new FuzzySet(100, 130, 130, 160);
+  FuzzySet* Lmid = new FuzzySet(130, 160, 160, 190);
+  FuzzySet* Lfast = new FuzzySet(160, 190, 190, 220);
+  FuzzySet* Lveryfast = new FuzzySet(190, 220, 220, 250);
+  
+  FuzzySet* Rveryslow = new FuzzySet(0, 0, 0, 60);
+  FuzzySet* Rslow = new FuzzySet(100, 130, 130, 160);
+  FuzzySet* Rmid = new FuzzySet(130, 160, 160, 190);
+  FuzzySet* Rfast = new FuzzySet(160, 190, 190, 220);
+  FuzzySet* Rveryfast = new FuzzySet(190, 220, 220, 250);
 
   // Creating FuzzySet to compond FuzzyOutput vr (Right Wheel Velocity)
 
-  vl->addFuzzySet(veryslow);
-  vl->addFuzzySet(slow);
-  vl->addFuzzySet(mid);
-  vl->addFuzzySet(fast);
-  vl->addFuzzySet(veryfast);
+  vl->addFuzzySet(Lveryslow);
+  vl->addFuzzySet(Lslow);
+  vl->addFuzzySet(Lmid);
+  vl->addFuzzySet(Lfast);
+  vl->addFuzzySet(Lveryfast);
 
 
-  vr->addFuzzySet(veryslow);
-  vr->addFuzzySet(slow);
-  vr->addFuzzySet(mid);
-  vr->addFuzzySet(fast);
-  vr->addFuzzySet(veryfast);
+  vr->addFuzzySet(Rveryslow);
+  vr->addFuzzySet(Rslow);
+  vr->addFuzzySet(Rmid);
+  vr->addFuzzySet(Rfast);
+  vr->addFuzzySet(Rveryfast);
 
 
   fuzzy->addFuzzyOutput(vl);
@@ -261,44 +282,44 @@ void setup()
 
 
   FuzzyRuleConsequent* VFVS = new FuzzyRuleConsequent();
-  VFVS->addOutput(veryfast);
-  VFVS->addOutput(veryslow);
+  VFVS->addOutput(Lveryfast);
+  VFVS->addOutput(Rveryslow);
   FuzzyRuleConsequent* FVS = new FuzzyRuleConsequent();
-  FVS->addOutput(fast);
-  FVS->addOutput(veryslow);
+  FVS->addOutput(Lfast);
+  FVS->addOutput(Rveryslow);
   FuzzyRuleConsequent* MVS = new FuzzyRuleConsequent();
-  MVS->addOutput(mid);
-  MVS->addOutput(veryslow);
+  MVS->addOutput(Lmid);
+  MVS->addOutput(Rveryslow);
   FuzzyRuleConsequent* SVS = new FuzzyRuleConsequent();
-  SVS->addOutput(slow);
-  SVS->addOutput(veryslow);
+  SVS->addOutput(Lslow);
+  SVS->addOutput(Rveryslow);
 
   FuzzyRuleConsequent* SS = new FuzzyRuleConsequent();
-  SS->addOutput(slow);
-  SS->addOutput(slow);
+  SS->addOutput(Lslow);
+  SS->addOutput(Rslow);
   FuzzyRuleConsequent* MM = new FuzzyRuleConsequent();
-  MM->addOutput(mid);
-  MM->addOutput(mid);
+  MM->addOutput(Lmid);
+  MM->addOutput(Rmid);
   FuzzyRuleConsequent* FF = new FuzzyRuleConsequent();
-  FF->addOutput(fast);
-  FF->addOutput(fast);
+  FF->addOutput(Lfast);
+  FF->addOutput(Rfast);
   FuzzyRuleConsequent* VFVF = new FuzzyRuleConsequent();
-  VFVF->addOutput(veryfast);
-  VFVF->addOutput(veryfast);
+  VFVF->addOutput(Lveryfast);
+  VFVF->addOutput(Rveryfast);
 
 
   FuzzyRuleConsequent* VSVF = new FuzzyRuleConsequent();
-  VSVF->addOutput(veryslow);
-  VSVF->addOutput(veryfast);
+  VSVF->addOutput(Lveryslow);
+  VSVF->addOutput(Rveryfast);
   FuzzyRuleConsequent* VSF = new FuzzyRuleConsequent();
-  VSF->addOutput(veryslow);
-  VSF->addOutput(fast);
+  VSF->addOutput(Lveryslow);
+  VSF->addOutput(Rfast);
   FuzzyRuleConsequent* VSM = new FuzzyRuleConsequent();
-  VSM->addOutput(veryslow);
-  VSM->addOutput(mid);
+  VSM->addOutput(Lveryslow);
+  VSM->addOutput(Rmid);
   FuzzyRuleConsequent* VSS = new FuzzyRuleConsequent();
-  VSS->addOutput(veryslow);
-  VSS->addOutput(slow);
+  VSS->addOutput(Lveryslow);
+  VSS->addOutput(Rslow);
 
   FuzzyRule* fuzzyRule01 = new FuzzyRule(1,  VSNB, FVS   );
   FuzzyRule* fuzzyRule02 = new FuzzyRule(2,  SNB,  VFVS  );
@@ -333,7 +354,7 @@ void setup()
   FuzzyRule* fuzzyRule31 = new FuzzyRule(31, VSPB, VSM   );
   FuzzyRule* fuzzyRule32 = new FuzzyRule(32, SPB,  VSVF  );
   FuzzyRule* fuzzyRule33 = new FuzzyRule(33, MPB,  VSVF  );
-  FuzzyRule* fuzzyRule34 = new FuzzyRule(34, BPB,  VSVF  );
+  FuzzyRule* fuzzyRule34 = new FuzzyRule(34, BPB,  VSVF  ); //VSVF
   FuzzyRule* fuzzyRule35 = new FuzzyRule(35, VBPB, VSVF  );
 
   fuzzy->addFuzzyRule(fuzzyRule01);
@@ -379,11 +400,46 @@ void loop()
 {
   //getAllDistances();  //to be used in pt 2 of code
   updateOdometry();
+  Serial.print("Dist: ");
+  Serial.print (dist_from_target);
+  Serial.print(" Diff Angle: ");
+  Serial.println(diff_angle * 180 / PI);
 
   fuzzy->setInput(1, dist_from_target); //todo: ADD DISTANCE FROM TARGET
-  fuzzy->setInput(2, diff_angle); //todo: ADD ANGLE DIFFERENCE
-
+  fuzzy->setInput(2, diff_angle * 180 / PI); //todo: ADD ANGLE DIFFERENCE
+  
   fuzzy->fuzzify();
+
+  Serial.print("distance pertinence: ");
+  Serial.print(verybig->getPertinence());
+  Serial.print(", ");
+  Serial.print(big->getPertinence());
+  Serial.print(", ");
+  Serial.print(medium->getPertinence());
+  Serial.print(", ");
+  Serial.print(small->getPertinence());
+  Serial.print(", ");
+  Serial.println(verysmall->getPertinence());
+  
+  Serial.print("angle pertinence: ");
+  Serial.print(negbig->getPertinence());
+  Serial.print(", ");
+  Serial.print(negmed->getPertinence());
+  Serial.print(", ");
+  Serial.print(negsmall->getPertinence());
+  Serial.print(", ");
+  Serial.print(zero->getPertinence());
+  Serial.print(", ");
+  Serial.print(possmall->getPertinence());
+  Serial.print(", ");
+  Serial.print(posmed->getPertinence());
+  Serial.print(", ");
+  Serial.println(posbig->getPertinence());
+  
+  Serial.println(fuzzy->isFiredRule(34));
+  Serial.println(fuzzy->isFiredRule(17));
+
+  
 
   float targetvl = fuzzy->defuzzify(1);
   float targetvr = fuzzy->defuzzify(2);
@@ -397,3 +453,4 @@ void loop()
 
   delay(100);
 }
+

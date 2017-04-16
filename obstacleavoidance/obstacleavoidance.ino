@@ -63,7 +63,7 @@ void moveRobot(int targetVL, int targetVR)
 
 void getAllDistances()
 {
-  
+
   unsigned int uS1 = sonar1.ping();
   delay(33);
   unsigned int uS2 = sonar2.ping();
@@ -117,6 +117,16 @@ void updateOdometry()
     prev_position_r = curr_position_r;
 
   }
+
+  float target_theta = atan2 (( target_y - curr_y), (target_x - curr_x));
+  float diff_angle = target_theta - curr_theta;
+
+  while (diff_angle > PI)
+    diff_angle -= (2.0 * PI);
+  while (diff_angle < -PI)
+    diff_angle += (2.0 * PI);
+
+
 }
 
 
@@ -169,31 +179,40 @@ void setup()
 
   // Creating FuzzySet to compond FuzzyOutput vl (Left Wheel Velocity)
 
-  FuzzySet* negfast = new FuzzySet(-250, -200, -200, -150);
-  FuzzySet* negmed = new FuzzySet(-180, -140, -140, -100);
-  FuzzySet* negslow = new FuzzySet(-120, -90, -90, -60);
-  FuzzySet* zeros = new FuzzySet(-90, 0, 0, 90);
-  FuzzySet* posslow = new FuzzySet(60, 90, 90, 120);
-  FuzzySet* posmed = new FuzzySet(100, 140, 140, 180);
-  FuzzySet* posfast = new FuzzySet(150, 200, 200, 250);
+  FuzzySet* Lnegfast = new FuzzySet(-250, -200, -200, -150);
+  FuzzySet* Lnegmed = new FuzzySet(-180, -140, -140, -100);
+  FuzzySet* Lnegslow = new FuzzySet(-120, -90, -90, -60);
+  FuzzySet* Lzero = new FuzzySet(-90, 0, 0, 90);
+  FuzzySet* Lposslow = new FuzzySet(60, 90, 90, 120);
+  FuzzySet* Lposmed = new FuzzySet(100, 140, 140, 180);
+  FuzzySet* Lposfast = new FuzzySet(150, 200, 200, 250);
+  
+  
+  FuzzySet* Rnegfast = new FuzzySet(-250, -200, -200, -150);
+  FuzzySet* Rnegmed = new FuzzySet(-180, -140, -140, -100);
+  FuzzySet* Rnegslow = new FuzzySet(-120, -90, -90, -60);
+  FuzzySet* Rzero = new FuzzySet(-90, 0, 0, 90);
+  FuzzySet* Rposslow = new FuzzySet(60, 90, 90, 120);
+  FuzzySet* Rposmed = new FuzzySet(100, 140, 140, 180);
+  FuzzySet* Rposfast = new FuzzySet(150, 200, 200, 250);
 
   // Creating FuzzySet to compond FuzzyOutput vr (Right Wheel Velocity)
 
-  vl->addFuzzySet(negfast);
-  vl->addFuzzySet(negmed);
-  vl->addFuzzySet(negslow);
-  vl->addFuzzySet(zero);
-  vl->addFuzzySet(posslow);
-  vl->addFuzzySet(posmed);
-  vl->addFuzzySet(posfast);
+  vl->addFuzzySet(Lnegfast);
+  vl->addFuzzySet(Lnegmed);
+  vl->addFuzzySet(Lnegslow);
+  vl->addFuzzySet(Lzero);
+  vl->addFuzzySet(Lposslow);
+  vl->addFuzzySet(Lposmed);
+  vl->addFuzzySet(Lposfast);
 
-  vr->addFuzzySet(negfast);
-  vr->addFuzzySet(negmed);
-  vr->addFuzzySet(negslow);
-  vr->addFuzzySet(zeros);
-  vr->addFuzzySet(posslow);
-  vr->addFuzzySet(posmed);
-  vr->addFuzzySet(posfast);
+  vr->addFuzzySet(Rnegfast);
+  vr->addFuzzySet(Rnegmed);
+  vr->addFuzzySet(Rnegslow);
+  vr->addFuzzySet(Rzero);
+  vr->addFuzzySet(Rposslow);
+  vr->addFuzzySet(Rposmed);
+  vr->addFuzzySet(Rposfast);
 
 
   oafuzzy->addFuzzyOutput(vl);
@@ -249,7 +268,7 @@ void setup()
   PBNM->joinWithAND(PBN, medium);
   FuzzyRuleAntecedent*  PBNN = new FuzzyRuleAntecedent();
   PBNN->joinWithAND(PBN, near);
-  
+
   FuzzyRuleAntecedent*  PSFF = new FuzzyRuleAntecedent();
   PSFF->joinWithAND(PSF, far);
   FuzzyRuleAntecedent*  PSFM = new FuzzyRuleAntecedent();
@@ -268,7 +287,7 @@ void setup()
   PSNM->joinWithAND(PSN, medium);
   FuzzyRuleAntecedent*  PSNN = new FuzzyRuleAntecedent();
   PSNN->joinWithAND(PSN, near);
-  
+
   FuzzyRuleAntecedent*  ZFF = new FuzzyRuleAntecedent();
   ZFF->joinWithAND(ZF, far);
   FuzzyRuleAntecedent*  ZFM = new FuzzyRuleAntecedent();
@@ -287,7 +306,7 @@ void setup()
   ZNM->joinWithAND(ZN, medium);
   FuzzyRuleAntecedent*  ZNN = new FuzzyRuleAntecedent();
   ZNN->joinWithAND(ZN, near);
-  
+
   FuzzyRuleAntecedent*  NSFF = new FuzzyRuleAntecedent();
   NSFF->joinWithAND(NSF, far);
   FuzzyRuleAntecedent*  NSFM = new FuzzyRuleAntecedent();
@@ -306,8 +325,8 @@ void setup()
   NSNM->joinWithAND(NSN, medium);
   FuzzyRuleAntecedent*  NSNN = new FuzzyRuleAntecedent();
   NSNN->joinWithAND(NSN, near);
-  
-  
+
+
   FuzzyRuleAntecedent*  NBFF = new FuzzyRuleAntecedent();
   NBFF->joinWithAND(NBF, far);
   FuzzyRuleAntecedent*  NBFM = new FuzzyRuleAntecedent();
@@ -326,9 +345,9 @@ void setup()
   NBNM->joinWithAND(NBN, medium);
   FuzzyRuleAntecedent*  NBNN = new FuzzyRuleAntecedent();
   NBNN->joinWithAND(NBN, near);
-  
+
   //Negative Big
-  
+
   FuzzyRuleAntecedent*  NBFFF = new FuzzyRuleAntecedent();
   NBFFF->joinWithAND(NBFF, far);
   FuzzyRuleAntecedent*  NBFFM = new FuzzyRuleAntecedent();
@@ -383,9 +402,9 @@ void setup()
   NBNFM->joinWithAND(NBNF, medium);
   FuzzyRuleAntecedent*  NBNFN = new FuzzyRuleAntecedent();
   NBNFN->joinWithAND(NBNF, near);
-  
-  
- // Negative Small
+
+
+  // Negative Small
 
   FuzzyRuleAntecedent*  NSFFF = new FuzzyRuleAntecedent();
   NSFFF->joinWithAND(NSFF, far);
@@ -441,8 +460,8 @@ void setup()
   NSNFM->joinWithAND(NSNF, medium);
   FuzzyRuleAntecedent*  NSNFN = new FuzzyRuleAntecedent();
   NSNFN->joinWithAND(NSNF, near);
-  
-//  Zero
+
+  //  Zero
 
   FuzzyRuleAntecedent*  ZFFF = new FuzzyRuleAntecedent();
   ZFFF->joinWithAND(ZFF, far);
@@ -498,8 +517,8 @@ void setup()
   ZNFM->joinWithAND(ZNF, medium);
   FuzzyRuleAntecedent*  ZNFN = new FuzzyRuleAntecedent();
   ZNFN->joinWithAND(ZNF, near);
-  
- // Positive Small
+
+  // Positive Small
 
   FuzzyRuleAntecedent*  PSFFF = new FuzzyRuleAntecedent();
   PSFFF->joinWithAND(PSFF, far);
@@ -555,8 +574,8 @@ void setup()
   PSNFM->joinWithAND(PSNF, medium);
   FuzzyRuleAntecedent*  PSNFN = new FuzzyRuleAntecedent();
   PSNFN->joinWithAND(PSNF, near);
-  
-   // Positive Big
+
+  // Positive Big
 
   FuzzyRuleAntecedent*  PBFFF = new FuzzyRuleAntecedent();
   PBFFF->joinWithAND(PBFF, far);
@@ -612,172 +631,172 @@ void setup()
   PBNFM->joinWithAND(PBNF, medium);
   FuzzyRuleAntecedent*  PBNFN = new FuzzyRuleAntecedent();
   PBNFN->joinWithAND(PBNF, near);
-  
- 
+
+
 
 
   FuzzyRuleConsequent* PFPF = new FuzzyRuleConsequent();
-  PFPF->addOutput(posfast);
-  PFPF->addOutput(posfast);
+  PFPF->addOutput(Lposfast);
+  PFPF->addOutput(Rposfast);
   FuzzyRuleConsequent* PFPM = new FuzzyRuleConsequent();
-  PFPM->addOutput(posfast);
-  PFPM->addOutput(posmed);
+  PFPM->addOutput(Lposfast);
+  PFPM->addOutput(Rposmed);
   FuzzyRuleConsequent* PFPS = new FuzzyRuleConsequent();
-  PFPS->addOutput(posfast);
-  PFPS->addOutput(posslow);
+  PFPS->addOutput(Lposfast);
+  PFPS->addOutput(Rposslow);
   FuzzyRuleConsequent* PFZ = new FuzzyRuleConsequent();
-  PFZ->addOutput(posfast);
-  PFZ->addOutput(zero);
+  PFZ->addOutput(Lposfast);
+  PFZ->addOutput(Rzero);
   FuzzyRuleConsequent* PFNS = new FuzzyRuleConsequent();
-  PFNS->addOutput(posfast);
-  PFNS->addOutput(negslow);
+  PFNS->addOutput(Lposfast);
+  PFNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* PFNM = new FuzzyRuleConsequent();
-  PFNM->addOutput(posfast);
-  PFNM->addOutput(negslow);
+  PFNM->addOutput(Lposfast);
+  PFNM->addOutput(Rnegslow);
   FuzzyRuleConsequent* PFNF = new FuzzyRuleConsequent();
-  PFNF->addOutput(posfast);
-  PFNF->addOutput(negfast);
-  
-  
+  PFNF->addOutput(Lposfast);
+  PFNF->addOutput(Rnegfast);
+
+
   FuzzyRuleConsequent* PMPF = new FuzzyRuleConsequent();
-  PMPF->addOutput(posmed);
-  PMPF->addOutput(posfast);
+  PMPF->addOutput(Lposmed);
+  PMPF->addOutput(Rposfast);
   FuzzyRuleConsequent* PMPM = new FuzzyRuleConsequent();
-  PMPM->addOutput(posmed);
-  PMPM->addOutput(posmed);
+  PMPM->addOutput(Lposmed);
+  PMPM->addOutput(Rposmed);
   FuzzyRuleConsequent* PMPS = new FuzzyRuleConsequent();
-  PMPS->addOutput(posmed);
-  PMPS->addOutput(posslow);
+  PMPS->addOutput(Lposmed);
+  PMPS->addOutput(Rposslow);
   FuzzyRuleConsequent* PMZ = new FuzzyRuleConsequent();
-  PMZ->addOutput(posmed);
-  PMZ->addOutput(zero);
+  PMZ->addOutput(Lposmed);
+  PMZ->addOutput(Rzero);
   FuzzyRuleConsequent* PMNS = new FuzzyRuleConsequent();
-  PMNS->addOutput(posmed);
-  PMNS->addOutput(negslow);
+  PMNS->addOutput(Lposmed);
+  PMNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* PMNM = new FuzzyRuleConsequent();
-  PMNM->addOutput(posmed);
-  PMNM->addOutput(negslow);
+  PMNM->addOutput(Lposmed);
+  PMNM->addOutput(Rnegslow);
   FuzzyRuleConsequent* PMNF = new FuzzyRuleConsequent();
-  PMNF->addOutput(posmed);
-  PMNF->addOutput(negfast);
-  
-  
+  PMNF->addOutput(Lposmed);
+  PMNF->addOutput(Rnegfast);
+
+
   FuzzyRuleConsequent* PSPF = new FuzzyRuleConsequent();
-  PSPF->addOutput(posmed);
-  PSPF->addOutput(posfast);
+  PSPF->addOutput(Lposmed);
+  PSPF->addOutput(Rposfast);
   FuzzyRuleConsequent* PSPM = new FuzzyRuleConsequent();
-  PSPM->addOutput(posmed);
-  PSPM->addOutput(posmed);
+  PSPM->addOutput(Lposmed);
+  PSPM->addOutput(Rposmed);
   FuzzyRuleConsequent* PSPS = new FuzzyRuleConsequent();
-  PSPS->addOutput(posmed);
-  PSPS->addOutput(posslow);
+  PSPS->addOutput(Lposmed);
+  PSPS->addOutput(Rposslow);
   FuzzyRuleConsequent* PSZ = new FuzzyRuleConsequent();
-  PSZ->addOutput(posmed);
-  PSZ->addOutput(zero);
+  PSZ->addOutput(Lposmed);
+  PSZ->addOutput(Rzero);
   FuzzyRuleConsequent* PSNS = new FuzzyRuleConsequent();
-  PSNS->addOutput(posmed);
-  PSNS->addOutput(negslow);
+  PSNS->addOutput(Lposmed);
+  PSNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* PSNMC = new FuzzyRuleConsequent();
-  PSNMC->addOutput(posmed);
-  PSNMC->addOutput(negslow);
+  PSNMC->addOutput(Lposmed);
+  PSNMC->addOutput(Rnegslow);
   FuzzyRuleConsequent* PSNFC = new FuzzyRuleConsequent();
-  PSNFC->addOutput(posmed);
-  PSNFC->addOutput(negfast);
-  
-  
-  
+  PSNFC->addOutput(Lposmed);
+  PSNFC->addOutput(Rnegfast);
+
+
+
   FuzzyRuleConsequent* ZPF = new FuzzyRuleConsequent();
-  ZPF->addOutput(zero);
-  ZPF->addOutput(posfast);
+  ZPF->addOutput(Lzero);
+  ZPF->addOutput(Rposfast);
   FuzzyRuleConsequent* ZPM = new FuzzyRuleConsequent();
-  ZPM->addOutput(zero);
-  ZPM->addOutput(posmed);
+  ZPM->addOutput(Lzero);
+  ZPM->addOutput(Rposmed);
   FuzzyRuleConsequent* ZPS = new FuzzyRuleConsequent();
-  ZPS->addOutput(zero);
-  ZPS->addOutput(posslow);
+  ZPS->addOutput(Lzero);
+  ZPS->addOutput(Rposslow);
   FuzzyRuleConsequent* ZZ = new FuzzyRuleConsequent();
-  ZZ->addOutput(zero);
-  ZZ->addOutput(zero);
+  ZZ->addOutput(Lzero);
+  ZZ->addOutput(Rzero);
   FuzzyRuleConsequent* ZNS = new FuzzyRuleConsequent();
-  ZNS->addOutput(zero);
-  ZNS->addOutput(negslow);
+  ZNS->addOutput(Lzero);
+  ZNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* ZNMC = new FuzzyRuleConsequent();
-  ZNMC->addOutput(zero);
-  ZNMC->addOutput(negslow);
+  ZNMC->addOutput(Lzero);
+  ZNMC->addOutput(Rnegslow);
   FuzzyRuleConsequent* ZNFC = new FuzzyRuleConsequent();
-  ZNFC->addOutput(zero);
-  ZNFC->addOutput(negfast);
-  
-  
+  ZNFC->addOutput(Lzero);
+  ZNFC->addOutput(Rnegfast);
+
+
   FuzzyRuleConsequent* NSPF = new FuzzyRuleConsequent();
-  NSPF->addOutput(negslow);
-  NSPF->addOutput(posfast);
+  NSPF->addOutput(Lnegslow);
+  NSPF->addOutput(Rposfast);
   FuzzyRuleConsequent* NSPM = new FuzzyRuleConsequent();
-  NSPM->addOutput(negslow);
-  NSPM->addOutput(posmed);
+  NSPM->addOutput(Lnegslow);
+  NSPM->addOutput(Rposmed);
   FuzzyRuleConsequent* NSPL = new FuzzyRuleConsequent();
-  NSPL->addOutput(negslow);
-  NSPL->addOutput(posslow);
+  NSPL->addOutput(Lnegslow);
+  NSPL->addOutput(Rposslow);
   FuzzyRuleConsequent* NSZ = new FuzzyRuleConsequent();
-  NSZ->addOutput(negslow);
-  NSZ->addOutput(zero);
+  NSZ->addOutput(Lnegslow);
+  NSZ->addOutput(Rzero);
   FuzzyRuleConsequent* NSNS = new FuzzyRuleConsequent();
-  NSNS->addOutput(negslow);
-  NSNS->addOutput(negslow);
+  NSNS->addOutput(Lnegslow);
+  NSNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* NSNMC = new FuzzyRuleConsequent();
-  NSNMC->addOutput(negslow);
-  NSNMC->addOutput(negslow);
+  NSNMC->addOutput(Lnegslow);
+  NSNMC->addOutput(Rnegslow);
   FuzzyRuleConsequent* NSNFC = new FuzzyRuleConsequent();
-  NSNFC->addOutput(negslow);
-  NSNFC->addOutput(negfast);
-  
-  
+  NSNFC->addOutput(Lnegslow);
+  NSNFC->addOutput(Rnegfast);
+
+
   FuzzyRuleConsequent* NMPF = new FuzzyRuleConsequent();
-  NMPF->addOutput(negmed);
-  NMPF->addOutput(posfast);
+  NMPF->addOutput(Lnegmed);
+  NMPF->addOutput(Rposfast);
   FuzzyRuleConsequent* NMPM = new FuzzyRuleConsequent();
-  NMPM->addOutput(negmed);
-  NMPM->addOutput(posmed);
+  NMPM->addOutput(Lnegmed);
+  NMPM->addOutput(Rposmed);
   FuzzyRuleConsequent* NMPS = new FuzzyRuleConsequent();
-  NMPS->addOutput(negmed);
-  NMPS->addOutput(posslow);
+  NMPS->addOutput(Lnegmed);
+  NMPS->addOutput(Rposslow);
   FuzzyRuleConsequent* NMZ = new FuzzyRuleConsequent();
-  NMZ->addOutput(negmed);
-  NMZ->addOutput(zero);
+  NMZ->addOutput(Lnegmed);
+  NMZ->addOutput(Rzero);
   FuzzyRuleConsequent* NMNS = new FuzzyRuleConsequent();
-  NMNS->addOutput(negmed);
-  NMNS->addOutput(negslow);
+  NMNS->addOutput(Lnegmed);
+  NMNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* NMNM = new FuzzyRuleConsequent();
-  NMNM->addOutput(negmed);
-  NMNM->addOutput(negslow);
+  NMNM->addOutput(Lnegmed);
+  NMNM->addOutput(Rnegslow);
   FuzzyRuleConsequent* NMNF = new FuzzyRuleConsequent();
-  NMNF->addOutput(negmed);
-  NMNF->addOutput(negfast);
-  
-  
+  NMNF->addOutput(Lnegmed);
+  NMNF->addOutput(Rnegfast);
+
+
   FuzzyRuleConsequent* NFPF = new FuzzyRuleConsequent();
-  NFPF->addOutput(negfast);
-  NFPF->addOutput(posfast);
+  NFPF->addOutput(Lnegfast);
+  NFPF->addOutput(Rposfast);
   FuzzyRuleConsequent* NFPM = new FuzzyRuleConsequent();
-  NFPM->addOutput(negfast);
-  NFPM->addOutput(posmed);
+  NFPM->addOutput(Lnegfast);
+  NFPM->addOutput(Rposmed);
   FuzzyRuleConsequent* NFPS = new FuzzyRuleConsequent();
-  NFPS->addOutput(negfast);
-  NFPS->addOutput(posslow);
+  NFPS->addOutput(Lnegfast);
+  NFPS->addOutput(Rposslow);
   FuzzyRuleConsequent* NFZ = new FuzzyRuleConsequent();
-  NFZ->addOutput(posfast);
-  NFZ->addOutput(zero);
+  NFZ->addOutput(Lposfast);
+  NFZ->addOutput(Rzero);
   FuzzyRuleConsequent* NFNS = new FuzzyRuleConsequent();
-  NFNS->addOutput(negfast);
-  NFNS->addOutput(negslow);
+  NFNS->addOutput(Lnegfast);
+  NFNS->addOutput(Rnegslow);
   FuzzyRuleConsequent* NFNM = new FuzzyRuleConsequent();
-  NFNM->addOutput(negfast);
-  NFNM->addOutput(negslow);
+  NFNM->addOutput(Lnegfast);
+  NFNM->addOutput(Rnegslow);
   FuzzyRuleConsequent* NFNF = new FuzzyRuleConsequent();
-  NFNF->addOutput(negfast);
-  NFNF->addOutput(negfast);
-  
-  
+  NFNF->addOutput(Lnegfast);
+  NFNF->addOutput(Rnegfast);
+
+
 
   FuzzyRule* fuzzyRule01 = new FuzzyRule(1,  PBFFF, PMPM    );
   FuzzyRule* fuzzyRule02 = new FuzzyRule(2,  PSFFF, PMPM    );
@@ -878,7 +897,7 @@ void setup()
   FuzzyRule* fuzzyRule97 = new FuzzyRule(97,  PSNFM,  PMPM   );
   FuzzyRule* fuzzyRule98 = new FuzzyRule(98,  ZNFM,   PMPM   );
   FuzzyRule* fuzzyRule99 = new FuzzyRule(99,  NSNFM,  PSPS   );
-  FuzzyRule* fuzzyRule100 = new FuzzyRule(100,NBNFM,  PMPM   );
+  FuzzyRule* fuzzyRule100 = new FuzzyRule(100, NBNFM,  PMPM   );
   FuzzyRule* fuzzyRule101 = new FuzzyRule(101, PBNFN, PMPM   );
   FuzzyRule* fuzzyRule102 = new FuzzyRule(102, PSNFN, PMPM   );
   FuzzyRule* fuzzyRule103 = new FuzzyRule(103, ZNFN,  PMPM   );
@@ -1060,8 +1079,8 @@ void loop()
   getAllDistances();  //to be used in pt 2 of code
   updateOdometry();
 
-  oafuzzy->setInput(1, dist1); 
-  oafuzzy->setInput(2, dist2); 
+  oafuzzy->setInput(1, dist1);
+  oafuzzy->setInput(2, dist2);
   oafuzzy->setInput(3, dist3);
   oafuzzy->setInput(4, diff_angle); //todo: ADD ANGLE DIFFERENCE
 

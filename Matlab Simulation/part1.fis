@@ -1,0 +1,91 @@
+[System]
+Name='part1'
+Type='sugeno'
+Version=2.0
+NumInputs=2
+NumOutputs=2
+NumRules=35
+AndMethod='prod'
+OrMethod='probor'
+ImpMethod='prod'
+AggMethod='sum'
+DefuzzMethod='wtaver'
+
+[Input1]
+Name='distance'
+Range=[0 60]
+NumMFs=5
+MF1='VS':'trimf',[-12.5 0 12.5]
+MF2='S':'trimf',[0 12.5 25]
+MF3='M':'trimf',[12.5 25 37.5]
+MF4='B':'trimf',[25 37.5 50]
+MF5='VB':'trapmf',[37.5 50 150 200]
+
+[Input2]
+Name='angle'
+Range=[-180 180]
+NumMFs=7
+MF1='NB':'trapmf',[-250 -200 -90 -60]
+MF2='NM':'trimf',[-90 -60 -30]
+MF3='NS':'trimf',[-60 -30 0]
+MF4='Z':'trimf',[-10 0 10]
+MF5='PS':'trimf',[0 30 60]
+MF6='PM':'trimf',[30 60 90]
+MF7='PB':'trapmf',[60 90 200 250]
+
+[Output1]
+Name='VR'
+Range=[0 1]
+NumMFs=5
+MF1='Z':'constant',[0]
+MF2='F':'constant',[3]
+MF3='M':'constant',[4]
+MF4='B':'constant',[5]
+MF5='VB':'constant',[7]
+
+[Output2]
+Name='VL'
+Range=[0 1]
+NumMFs=5
+MF1='Z':'constant',[0]
+MF2='F':'constant',[3]
+MF3='M':'constant',[4]
+MF4='B':'constant',[5]
+MF5='VB':'constant',[7]
+
+[Rules]
+1 1, 4 1 (1) : 1
+2 1, 5 1 (1) : 1
+3 1, 5 1 (1) : 1
+4 1, 5 1 (1) : 1
+5 1, 5 1 (1) : 1
+1 2, 3 1 (1) : 1
+2 2, 4 1 (1) : 1
+3 2, 5 1 (1) : 1
+5 2, 5 1 (1) : 1
+1 3, 2 1 (1) : 1
+2 3, 3 1 (1) : 1
+3 3, 4 1 (1) : 1
+4 3, 5 1 (1) : 1
+5 3, 5 1 (1) : 1
+4 2, 5 1 (1) : 1
+1 4, 2 2 (1) : 1
+2 4, 2 2 (1) : 1
+3 4, 3 3 (1) : 1
+4 4, 4 4 (1) : 1
+5 4, 5 5 (1) : 1
+1 5, 1 2 (1) : 1
+2 5, 1 3 (1) : 1
+3 5, 1 4 (1) : 1
+4 5, 1 5 (1) : 1
+5 5, 1 5 (1) : 1
+1 6, 1 3 (1) : 1
+2 6, 1 4 (1) : 1
+3 6, 1 5 (1) : 1
+4 6, 1 5 (1) : 1
+5 6, 1 5 (1) : 1
+1 7, 1 4 (1) : 1
+2 7, 1 5 (1) : 1
+3 7, 1 5 (1) : 1
+4 7, 1 5 (1) : 1
+5 7, 1 5 (1) : 1
